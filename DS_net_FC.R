@@ -105,12 +105,12 @@ DS_net_FC <-
     ## save into a .csv file
     # create the output path if it does not exist
     dir.create(fdir_o, recursive=TRUE, showWarnings = FALSE)
-    # replace suffix
-    fout <- sub('.tsv', paste0('_FC_',win_width,'_',win_overlap,'.csv'), fin) # suffix
-    fseg <- fout %>% strsplit(split = '/') %>% .[[1]]
-    len_fseg <- length(fseg) # length of the file segments
+    # file extension
+    fex  <- strsplit(basename(fin), split="\\.")[[1]][-1] 
+    # replace file suffix
+    fout <- sub(paste0(".",fex), paste0('_FC_',win_width,'_',win_overlap,'.csv'), fin) # suffix
     # final output filename
-    fout <- file.path(fdir_o, fseg[[len_fseg]])
+    fout <- file.path(fdir_o, basename(fout))
     
     # save matrix into csv file
     Z %>% as.data.table() %>% fwrite(fout)
