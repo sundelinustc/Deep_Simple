@@ -36,9 +36,9 @@ DS_copy <- function(fdir_in, fdir_out, fstrings=NULL){
   fs::path(fdir_out, dirs) %>% fs::dir_create()
   
   # Copy the matching files to the destination directory
-  print("Copying files!!! May time consuming!!!")
+  print("Copying files!!! Please be patient...")
   matching_files %>% fs::file_copy(
     fs::path(fdir_out, matching_files)
   )
-  print("Files copied!!! Please double check the files!!!")
+  print("Files copied!!! Please double check the files!")
 }
