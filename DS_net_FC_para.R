@@ -158,7 +158,7 @@ DS_net_FC_para <-
               .export=c('DS_net_FC')) %dopar% {
                 
                 # call the function per core
-                DS_net_FC(df$sig_denoised[[i]], win_width, win_overlap, df$TR[[i]], NULL, fdir_o) 
+                DS_net_FC(df$sig_fullname[[i]], win_width, win_overlap, df$TR[[i]], NULL, fdir_o) 
               }
       
       #stop cluster
