@@ -43,8 +43,8 @@ DS_stat_para <- function(fn_cleaned, fn_info=NULL, Y, fn_mtxt, fdir) {
   # remove these columns of NA or constants from cleaned data
   df0      <- df0[, !colnames(df0) %in% col_NAorConst]
   
-  # names of columns as dependent variables (Y)
-  Y <- df0 %>% select(starts_with("DFC"), starts_with("SFC")) %>% colnames()
+  # # names of columns as dependent variables (Y)
+  # Y <- df0 %>% select(starts_with("DFC"), starts_with("SFC")) %>% colnames()
   # also remove these columns from the dependent variables
   Y <- Y[!Y %in% col_NAorConst]
   
@@ -61,6 +61,9 @@ DS_stat_para <- function(fn_cleaned, fn_info=NULL, Y, fn_mtxt, fdir) {
         ifelse(length(unique(x)) > 5,
                'numeric',
                'Categorical')) # categorical variables if No. of unique values > 5
+    }else{
+      # if there is no fn_info, we have to make some related info by ourselves
+      
     }
     
     # set categorical variables following VarClass
