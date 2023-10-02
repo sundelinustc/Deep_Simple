@@ -31,9 +31,9 @@ pacman::p_load(
 # --- fn_cleaned, filename of cleaned data (.csv), row=subject, column=feature
 # --- fn_info,    filename of the info of cleaned data (.csv), row=feature, column=attributes(domain,atlas, etc.)
 # --- Y,          vector of the names of dependent variables, e.g. c("roi_1","roi_2")
-# --- fn_mtxt,    filename of the .csv file of statistical models (row=model), e.g. "lm(y ~ Group + Age)" or "lmer(y ~ Group + Age + (1|SITE))"
-# --- fdir, the directory of the final outputs (statistical outputs + model estimations)
-DS_stat_para <- function(fn_cleaned, fn_info=NULL, Y, fn_mtxt, fdir) {
+# --- fn_models,  filename of the .csv file of statistical models (row=model), e.g. "lm(y ~ Group + Age)" or "lmer(y ~ Group + Age + (1|SITE))"
+# --- fdir_o,     the directory of the final outputs (statistical outputs + model estimations)
+DS_stat_para <- function(fn_cleaned, fn_info=NULL, Y, fn_models, fdir_o) {
   
   # load cleaned data
   df0      <- fn_cleaned %>% fread() %>% as.data.frame()
@@ -55,20 +55,42 @@ DS_stat_para <- function(fn_cleaned, fn_info=NULL, Y, fn_mtxt, fdir) {
     # remove the variables just of NA or constants
     df0_info <- df0_info[!df0_info$VarName %in% col_NAorConst,]
     # set specific columns as factor
-    # if there is no column called "VarClass" in df0_info, make a coulmn of VarClass
+    # if there is NO column called "VarClass" in df0_info, make a coulmn of VarClass
     if (!"VarClass" %in% colnames(df0_info)) {
       df0_info$VarClass <- apply(df0, 2, function(x)
         ifelse(length(unique(x)) > 5,
-               'numeric',
+               'Numeric',
                'Categorical')) # categorical variables if No. of unique values > 5
     }else{
-      # if there is no fn_info, we have to make some related info by ourselves
+      # if there IS a column called "VarClass", we need to set categorical variables
+      # categorical variables without order
+      name_cat_NoOrder <- df0_info %>% 
+        filter(VarClass=='Categorical') %>% 
+        filter(OrderCategorical=="") %>% .$VarName
+      # set the above categorical variables as factors
+      df0[name_cat_NoOrder] <- lapply(df0[name_cat_NoOrder], factor)
       
+      # categorical variables with order
+      name_cat_Order <- df0_info %>% 
+        filter(VarClass=='Categorical') %>% 
+        filter(OrderCategorical!="") %>% .$VarName
+      # set the above categorical variables as factors with order
+      for (ncat in name_cat_Order){
+        # for each such variable
+        nlevels <- df0_info[df0_info$VarName==ncat, "OrderCategorical"] %>% 
+          str_split(";") %>% unlist()
+        df0[ncat] <- df0[ncat] %>% factor(levels = nlevels)
+      }
+      
+      myfun_factor <- function(col, levels){
+        return(col %>% factor(levels))
+      }
+      df0[name_cat_Order] <- lapply(df0[name_cat_Order], factor, 
+       levels=unlist(str_split(df0_info[df0_info$VarName=="Sex",
+                                        "OrderCategorical"],";")))
     }
     
-    # set categorical variables following VarClass
-    name_cat <- df0_info %>% filter(VarClass == 'Categorical') %>% .$VarName
-    df0[name_cat] <- lapply(df0[name_cat], factor)
+    
     
   }
   
