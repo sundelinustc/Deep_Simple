@@ -1,16 +1,13 @@
-### Calculate static or dynamic functional connectivity using atlas-based time series through parallel processing
+### Calculate static or dynamic functional connectivity based on atlas-based time series
 
 ## Load packages
 if (!require("pacman"))
   install.packages("pacman") # make sure that pacman is installed
 
-pacman::p_load(
-  dplyr,        # data management
-  DescTools,    # for Fisher's r-to-z transformation
-  data.table,   # to make read & write files quicker
-  foreach,      # parallel processing
-  doParallel    # parallel processing
-  )
+pacman::p_load(tidyverse,    # data management + ggplot2 graphics
+               DescTools,    # for Fisher's r-to-z transformation
+               data.table    # to make read & write files quicker
+               )
                
                
 # Input
@@ -23,7 +20,14 @@ pacman::p_load(
 # Output
 # --- a matrix of standard deviation for dynamic rsFC, or Fisher-Z-transformed Pearson's correlation coefficients for static rsFC
 # --- output file (.csv) of the matrix for correlation coefficients (for static FC) or the standrad seviations of the correlation coefficients (for dynamic FC)
-myfun_DS_net_FC <- function(fin, win_width, win_overlap, TR, idx, fdir_o) {
+DS_net_FC <-
+  function(fin,
+           win_width = 30,
+           win_overlap = 50,
+           TR = 3,
+           idx = NULL,
+           fdir_o = file.path('..', 'Results','FC_Matrix')
+           ) {
     
     ## Load data & manipulations
     # load time series of all areas (Num. of time points x Num. of areas)
@@ -115,51 +119,4 @@ myfun_DS_net_FC <- function(fin, win_width, win_overlap, TR, idx, fdir_o) {
     # return
     # return(Z) # DO NOT return it when parallelize processing
   }
-     
-
-
-
-# Input
-# --- df, dataframe of subjects' info, including fID, path to the data, TR
-# --- win_width, window width, default=30 s
-# --- win_overlap, window overlap, default=50%, while 100% means static rsFC
-# --- idx, a vector of logical values (TRUE or FALSE) of areas of interest
-# --- fdir_o, directory of the output files (.csv)
-# Output
-# --- a matrix of standard deviation for dynamic rsFC, or Fisher-Z-transformed Pearson's correlation coefficients for static rsFC
-# --- output file (.csv) of the matrix for correlation coefficients (for static FC) or the standrad seviations of the correlation coefficients (for dynamic FC)
-DS_net_FC_para <-
-  function(df,
-           win_width = 30,
-           win_overlap = 50,
-           idx = NULL,
-           fdir_o = file.path('..', 'Processes','FC_Matrix')
-  ) {        
-    
-    system.time({
-      # print beginning information
-      print("Static or Dynamic Functional Connection Calculation!!! Parallel processing. Please be patient...")
-      print(paste("window width =",win_width, "    window overlap =",win_overlap,"%"))
-      
-      # setup parallel backend to use many processors
-      cores <- detectCores()
-      cl <- makeCluster(cores[1])
-      registerDoParallel(cl)
-      
-      # Run parallel processing
-      foreach(i = 1:dim(df)[1], .packages=c('dplyr','data.table','DescTools'), 
-              .export=c('myfun_DS_net_FC')) %dopar% {
-                
-                # call the function per core
-                myfun_DS_net_FC(df$sig_fullname[[i]], win_width, win_overlap, df$TR[[i]], idx, fdir_o) 
-              }
-      
-      #stop cluster
-      stopCluster(cl)
-      
-      # print ending information
-      print("Completed! Static or Dynamic Functional Connection Calculation. Please double check the outputs!")
-      
-    })
-    
-  }
+               

@@ -254,13 +254,21 @@ ptxt <- function(x, ...) {
   return(ptxt)
 }
 
+
+fnote_default <- "Note: Continuous variables are presented as Mean ± SD, while categorical variables are presented as Count (Proportion in %).\n 
+# The column named Statistics shows the statistical outputs of betwee-group comparisons. For categorical variables, the Chi-Square Test of Independence is used when all of the cell counts in a crosstable are more than 5; otherwise, the Fisher’s Exact Test is used.\n
+# For the comparisons of continuous variables between two independent samples, the Two Sample t test (or Welch’s t test) is employed if the variances are equal (or unequal, estimated by an F test) for the two samples.\n
+# In the case of comparisons of continuous variables between three or more independent samples, the One-Way ANOVA (or Welch's ANOVA) is employed if the variances are equal (or unequal, examined by the Levene's Test) across samples, and if all samples are normally distributed (examined by a Shapiro-Wilk normality test), and Tukey's ‘Honest Significant Difference’ method is employed to correct for post-hoc comparisons for the significant ANOVA output. The Kruskal-Wallis test is used if the assumption of normality is violated in any group, and the Dunn test is employed for post-hoc comparisons for significant Kruskal-Wallis test output.\n
+# Missing values are not included in statistical analyses. All tests are two-tailed at the 0.05 level of significance.\n"
+
+
 ### function to make Table 1
 ##  including both descriptive & statistical outputs
 ## Input:
 ## --- df, dataframe contains variables of interest (continuous or categorical)
 ## --- fmodel, a string of model for table1 function, e.g. "~ Age  + Sex + PTSDlifeDx + DepSev | Group", Group is grouping variable
-## --- fnote, the footnote, default: "None"
-DS_table1 <- function(df, fmodel, fnote = "None") {
+## --- fnote, the footnote, default: fnote_default, which lists all of the statistical methods that are employed by Table1
+DS_table1 <- function(df, fmodel, fnote = fnote_default) {
   ## my render: how to display descriptive statistics
   # continuous variables
   my.render.cont <- function(x) {
