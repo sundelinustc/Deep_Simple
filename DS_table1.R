@@ -7,6 +7,7 @@ if (!require("pacman")) {
 
 pacman::p_load(tidyverse,    # data manipulaions
                flextable,    # for making tables (italic etc.)
+               rcompanion,   # 
                table1        # to make Table1
 )
 
@@ -61,8 +62,8 @@ ds_CatTest <- function(y, g) {
     ptxt <- paste0("Fisher’s exact test, p = ",
                    round(grp_sig, 3))    # Fisher’s exact test, p = p-val)
     
-    # Post hoc tests
-    if (grp_sig < .05) {
+    # Post hoc tests (for more than 2 groups)
+    if ((grp_sig < .05) & (length(unique(g)) > 2)) {
       mdl_post <-
         pairwiseNominalIndependence(table(g, y), method = 'bonferroni')
       for (i in seq(dim(mdl_post)[[1]])) {
@@ -92,9 +93,9 @@ ds_CatTest <- function(y, g) {
       ", p = ",
       round(mdl$p.value, 3)    # χ2(df, N) = chi2-val, p = p-val
     )
-    
-    # Post hoc tests
-    if (grp_sig < .05) {
+
+    # Post hoc tests (for more than 2 groups)
+    if ((grp_sig < .05) & (length(unique(g)) > 2)) {
       mdl_post <-
         pairwiseNominalIndependence(table(g, y), method = 'bonferroni')
       for (i in seq(dim(mdl_post)[[1]])) {
